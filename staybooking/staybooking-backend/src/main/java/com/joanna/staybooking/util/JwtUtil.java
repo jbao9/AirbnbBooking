@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 
+//生成token, 解析token
 @Component
 public class JwtUtil {
     @Value("${jwt.secret}")   //load property文件，把jwt.secret的值加载进来

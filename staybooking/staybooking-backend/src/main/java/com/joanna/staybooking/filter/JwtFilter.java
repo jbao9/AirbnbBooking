@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+//解析token, 保存在SecurityContextHolder 对象里
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     private final String HEADER = "Authorization";
@@ -28,7 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    public JwtFilter(AuthorityRepository authorityRepository, JwtUtil jwtUtil) {
+    public JwtFilter(AuthorityRepository authorityRepository, JwtUtil jwtUtil) { //判断token是否valid
         this.authorityRepository = authorityRepository;
         this.jwtUtil = jwtUtil;
     }

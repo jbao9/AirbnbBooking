@@ -14,7 +14,7 @@ import java.util.List;
 
 //根据要住的经纬度，返回房源信息
 public class CustomLocationRepositoryImpl implements CustomLocationRepository {
-    private final String DEFAULT_DISTANCE = "50";
+    private final String DEFAULT_DISTANCE = "50000";  //50
     private ElasticsearchOperations elasticsearchOperations;
 
     @Autowired

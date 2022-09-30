@@ -1,9 +1,10 @@
 package com.joanna.staybooking.service;
 
+import com.joanna.staybooking.exception.StayDeleteException;
 import com.joanna.staybooking.exception.StayNotExistException;
-import com.joanna.staybooking.model.Stay;
-import com.joanna.staybooking.model.StayImage;
-import com.joanna.staybooking.model.User;
+import com.joanna.staybooking.model.*;
+import com.joanna.staybooking.repository.LocationRepository;
+import com.joanna.staybooking.repository.ReservationRepository;
 import com.joanna.staybooking.repository.StayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,13 +21,22 @@ import java.util.stream.Collectors;
 @Service    //激活 inversion of control, spring帮助创建对象，可以支持@Autowired
 public class StayService {
     private StayRepository stayRepository;
+    private LocationRepository locationRepository;
+    private ReservationRepository reservationRepository;
     private ImageStorageService imageStorageService;
+    private GeoCodingService geoCodingService;
 
     @Autowired
-    public StayService(StayRepository stayRepository, ImageStorageService imageStorageService) {
+    public StayService(StayRepository stayRepository, LocationRepository locationRepository,
+                       ReservationRepository reservationRepository,
+                       ImageStorageService imageStorageService, GeoCodingService geoCodingService) {
         this.stayRepository = stayRepository;
+        this.locationRepository = locationRepository;
+        this.reservationRepository = reservationRepository;
         this.imageStorageService = imageStorageService;
+        this.geoCodingService = geoCodingService;
     }
+
 
     //Implement the methods for stay save, delete by id, list by the user and get by id
     public List<Stay> listByUser(String username) {
@@ -60,6 +71,9 @@ public class StayService {
 
         stay.setImages(stayImages);
         stayRepository.save(stay);
+
+        Location location = geoCodingService.getLatLng(stay.getId(), stay.getAddress());
+        locationRepository.save(location);  //存进elastic search
     }
 
 
@@ -69,6 +83,10 @@ public class StayService {
         Stay stay = stayRepository.findByIdAndHost(stayId, new User.Builder().setUsername(username).build());
         if (stay == null) {
             throw new StayNotExistException("Stay doesn't exist");
+        }
+        List<Reservation> reservations = reservationRepository.findByStayAndCheckoutDateAfter(stay, LocalDate.now());
+        if (reservations != null && reservations.size() > 0) {
+            throw new StayDeleteException("Cannot delete stay with active reservation");
         }
         stayRepository.deleteById(stayId);
     }

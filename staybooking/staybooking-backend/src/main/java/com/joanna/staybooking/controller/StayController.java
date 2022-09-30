@@ -1,7 +1,9 @@
 package com.joanna.staybooking.controller;
 
+import com.joanna.staybooking.model.Reservation;
 import com.joanna.staybooking.model.Stay;
 import com.joanna.staybooking.model.User;
+import com.joanna.staybooking.service.ReservationService;
 import com.joanna.staybooking.service.StayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +16,13 @@ import java.util.List;
 @RestController   //Controller : annotate 成 MVC的controller, 可以接收前端穿过来的对象
 public class StayController {
     private StayService stayService;
+    private ReservationService reservationService;
+
 
     @Autowired
-    public StayController(StayService stayService) {
+    public StayController(StayService stayService, ReservationService reservationService) {
         this.stayService = stayService;
+        this.reservationService = reservationService;
     }
 
     //Implement the methods for all stay management APIs
@@ -30,6 +35,11 @@ public class StayController {
     @GetMapping(value = "/stays/{stayId}")
     public Stay getStay(@PathVariable Long stayId, Principal principal) {
         return stayService.findByIdAndHost(stayId, principal.getName());
+    }
+
+    @GetMapping(value = "/stays/reservations/{stayId}")
+    public List<Reservation> listReservations(@PathVariable Long stayId) {
+        return reservationService.listByStay(stayId);
     }
 
     @PostMapping("/stays")

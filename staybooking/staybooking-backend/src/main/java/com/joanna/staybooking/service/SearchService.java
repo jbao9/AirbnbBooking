@@ -14,6 +14,7 @@ import java.util.Set;
 
 @Service
 public class SearchService {
+    //要用这三个对搜索结果进行筛选
     private StayRepository stayRepository;
     private StayReservationDateRepository stayReservationDateRepository;
     private LocationRepository locationRepository;

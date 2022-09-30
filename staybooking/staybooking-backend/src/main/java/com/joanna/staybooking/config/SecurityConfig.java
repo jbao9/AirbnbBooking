@@ -35,11 +35,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception { //config成需要用户登陆后才能访问
         http
-                .authorizeRequests()
+                .authorizeRequests() //说明我对权限有控制
                 .antMatchers(HttpMethod.POST, "/register/*").permitAll()  //permitAll():不需要验证用户登陆状态
                 .antMatchers(HttpMethod.POST, "/authenticate/*").permitAll()
                 .antMatchers("/stays").hasAuthority("ROLE_HOST")
                 .antMatchers("/stays/*").hasAuthority("ROLE_HOST")
+                .antMatchers("/search").hasAuthority("ROLE_GUEST")
+                .antMatchers("/reservations").hasAuthority("ROLE_GUEST")
+                .antMatchers("/reservations/*").hasAuthority("ROLE_GUEST")
 //                .antMatchers("/stays").permitAll()  //为了测试，后期要删掉
 //                .antMatchers("/stays/*").permitAll() //为了测试，后期要删掉
                 .anyRequest().authenticated()
@@ -50,9 +53,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); //先通过jwtFilter验证，再做username和pw验证 (add jwtFilter before Spring frame filter)
     }
 
+    //验证用户名、密码是否正确
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception { //config成验证authentication（验证用户名、密码）,告诉框架在哪里找
         auth.jdbcAuthentication().dataSource(dataSource)
@@ -63,7 +67,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
+    public AuthenticationManager authenticationManagerBean() throws Exception {  //做用户名和密码验证的对象
         return super.authenticationManagerBean();
     }
 }
+
+//Authentication vs. Authorization    验证 vs. 授权
+// 先 Authentication 再 Authorization
