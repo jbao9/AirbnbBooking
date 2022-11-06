@@ -54,7 +54,7 @@ public class StayService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void add(Stay stay, MultipartFile[] images) {
-        //upload files, return urls        //stream(images).parallel() 并行处理array里对应的元素
+        //upload files, return urls        //stream(images).parallel() 并行处理array里对应的元素，好处：并发执行、上传速度快，但是顺序不一定
         List<String> mediaLinks = Arrays.stream(images).parallel().map(image -> imageStorageService.save(image)).collect(Collectors.toList());
         //下面时比较native的写法，没有并行上传的功能，属于串行操作
 //        List<String> imageUrls = new ArrayList();
@@ -73,11 +73,14 @@ public class StayService {
         stayRepository.save(stay);
 
         Location location = geoCodingService.getLatLng(stay.getId(), stay.getAddress());
+        System.out.println(location.getId());  //debug
+        System.out.println(location.getGeoPoint().toString());  //debug
+
         locationRepository.save(location);  //存进elastic search
     }
 
 
-    //原子操纵，当一个操作涉及到多个table,确保成功都成功，失败都失败  //删除stay, 它相关的日期、image等都要被删掉
+    //原子操做，当一个操作涉及到多个table,确保成功都成功，失败都失败  //删除stay, 它相关的日期、image等都要被删掉
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void delete(Long stayId, String username) throws StayNotExistException {
         Stay stay = stayRepository.findByIdAndHost(stayId, new User.Builder().setUsername(username).build());
@@ -88,6 +91,6 @@ public class StayService {
         if (reservations != null && reservations.size() > 0) {
             throw new StayDeleteException("Cannot delete stay with active reservation");
         }
-        stayRepository.deleteById(stayId);
-    }
+        stayRepository.deleteById(stayId); //我们只在在数据库删除了相关信息，并没有真正从网盘删除图片，为了用户等待时间不那么长(在线操作)
+    }                                      //我们可以定期扫描stay图片，看他们在数据库里有没有对应的stay,如果没有就删除 (离线操作)
 }

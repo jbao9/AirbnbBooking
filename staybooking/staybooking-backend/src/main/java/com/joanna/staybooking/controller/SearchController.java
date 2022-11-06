@@ -31,6 +31,7 @@ public class SearchController {
             @RequestParam(name = "distance", required=false) String distance) {
         LocalDate checkinDate = LocalDate.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         LocalDate checkoutDate = LocalDate.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
         if (checkinDate.equals(checkoutDate) || checkinDate.isAfter(checkoutDate) || checkinDate.isBefore(LocalDate.now())) {
             throw new InvalidSearchDateException("Invalid date for reservation");
         }

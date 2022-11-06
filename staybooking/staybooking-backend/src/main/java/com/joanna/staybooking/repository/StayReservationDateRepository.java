@@ -17,5 +17,5 @@ public interface StayReservationDateRepository  extends JpaRepository<StayReserv
             //stay in in 一个参数List<Long> stayIds, AND date BETWEEN startDate AND endDate
     //?1 代表第一个参数  ?2 代表第二个参数
     Set<Long> findByIdInAndDateBetween(List<Long> stayIds, LocalDate startDate, LocalDate endDate);
-}
+}       //从elasticsearch返回的id集合里搜索 并且 在某个日期区间里
 

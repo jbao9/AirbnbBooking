@@ -26,14 +26,15 @@ public class StayController {
     }
 
     //Implement the methods for all stay management APIs
+
     @GetMapping(value = "/stays")
-    public List<Stay> listStays(Principal principal) {
+    public List<Stay> listStays(Principal principal) {  //get stay by user
         return stayService.listByUser(principal.getName());
     }
 
     //principal 意思是 当前用户
     @GetMapping(value = "/stays/{stayId}")
-    public Stay getStay(@PathVariable Long stayId, Principal principal) {
+    public Stay getStay(@PathVariable Long stayId, Principal principal) {  //get stay by id
         return stayService.findByIdAndHost(stayId, principal.getName());
     }
 

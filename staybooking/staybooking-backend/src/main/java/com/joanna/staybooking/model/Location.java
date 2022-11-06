@@ -9,13 +9,14 @@ import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 
 import java.io.Serializable;
 
-@Document(indexName = "loc")  // Document: Entity  indexName:table name
+//存在elasticsearch 里面
+@Document(indexName = "loc")  // Document: 相当于mysql里的 Entity  indexName:table name  这是elastic search的 annotation
 public class Location implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
     @Field(type = FieldType.Long)
-    private Long id;
+    private Long id;    //stay id
 
     @GeoPointField
     private GeoPoint geoPoint;
